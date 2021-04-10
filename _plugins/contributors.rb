@@ -58,10 +58,6 @@ module Jekyll
         x = {}
         x['name'] = name
         x['contributions'] = c['contributions']
-        # Set avatar_url when available
-        if c.has_key?('avatar_url') and c['avatar_url'].is_a?(String) and /^https:\/\/avatars\.githubusercontent\.com\/u\/[0-9]{1,10}\?v=[0-9]{1,2}$/.match(c['avatar_url'])
-          x['avatar_url'] = c['avatar_url'] + '&amp;size=16'
-        end
         # Set login when available
         if c.has_key?('login') and c['login'].is_a?(String) and /^[A-Za-z0-9\-]{1,150}$/.match(c['login'])
           x['login'] = c['login']
@@ -82,17 +78,19 @@ module Jekyll
 
     def generate(site)
       # Set site.contributors global variables for liquid/jekyll
-      class << site
-        attr_accessor :corecontributors
-        attr_accessor :sitecontributors
-        alias contrib_site_payload site_payload
-        def site_payload
-          h = contrib_site_payload
-          payload = h["site"]
-          payload["corecontributors"] = self.corecontributors
-          payload["sitecontributors"] = self.sitecontributors
-          h["site"] = payload
-          h
+      if ! site.respond_to?('corecontributors')
+        class << site
+          attr_accessor :corecontributors
+          attr_accessor :sitecontributors
+          alias contrib_site_payload site_payload
+          def site_payload
+            h = contrib_site_payload
+            payload = h["site"]
+            payload["corecontributors"] = self.corecontributors
+            payload["sitecontributors"] = self.sitecontributors
+            h["site"] = payload
+            h
+          end
         end
       end
 
